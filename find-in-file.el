@@ -43,17 +43,18 @@
   "Name prefix for project files.
  Emacs appends name of major mode and looks for such a file in
  the current directory and its parents.")
+(defvar backup-project-file ".git")
+(defvar exclude-regex ".*/\\\..*")
+(defvar include-regex ".*")
 
-(defun plv-find-project-file (dir mode-name)
- (let ((f (expand-file-name (concat plv-project-file mode-name) dir))
+(defun plv-find-project-file (dir project-filename)
+ (let ((f (expand-file-name project-filename dir))
        (parent (file-truename (expand-file-name ".." dir))))
    (cond ((string= dir parent) nil)
          ((file-exists-p f) f)
-         (t (plv-find-project-file parent mode-name)))))
+         (t (plv-find-project-file parent project-filename)))))
 
 (add-to-list 'auto-mode-alist '("^\.emacs-project" . emacs-lisp-mode))
-
-(provide 'project-local-variables)
 
 ;;; project-local-variables.el ends here
 
@@ -137,14 +138,16 @@
 Use this to exclude portions of your project: \"-not -regex \\\".*vendor.*\\\"\"")
 
 (defun ffip-project-root ()
-  (file-name-directory (plv-find-project-file default-directory "")))
+  (file-name-directory (or
+			(plv-find-project-file default-directory plv-project-file)
+			(plv-find-project-file default-directory backup-project-file)
+			default-directory)))
 
 (defun ffip-uniqueify (file-cons)
   "Set the car of the argument to include the directory name plus the file name."
   (setcar file-cons
 	  (concat (car file-cons) " "
 		  (cadr (reverse (split-string (cdr file-cons) "/"))))))
-
 
 (defun ffip-project-files ()
   "Return an alist of all filenames in the project and their path.
@@ -161,9 +164,14 @@ directory they are found in so that they are unique."
 		(add-to-list 'file-alist file-cons)
 		file-cons))
 	    (split-string (shell-command-to-string (concat "find " (ffip-project-root)
-							   " -type f -regex \""
-							   ".*"
-							   "\" " ffip-find-options))))))
+							   " -type f \\\( -regex \""
+							   include-regex
+							   "\" " 
+							   "! -regex \""
+							   exclude-regex
+							   "\" \\\) "))))))
+
+"find /Users/pierrelarochelle/Documents/Source/mixpanel/ -type f -regex \".*\" "
 
 (defun find-file-in-project ()
   "Prompt with a completing list of all files in the project to find one.
@@ -182,5 +190,3 @@ setting the `ffip-project-root' variable."
 
 (provide 'find-file-in-project)
 ;;; find-file-in-project.el ends here
-
-(find-file-in-project)
