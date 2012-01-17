@@ -39,13 +39,13 @@
 
 ;; It has not been tested in versions of Emacs prior to 22.
 
-(defvar plv-project-file ".emacs-project"
+(defvar ffip-project-file ".emacs-project"
   "Name prefix for project files.
  Emacs appends name of major mode and looks for such a file in
  the current directory and its parents.")
-(defvar backup-project-file ".git")
-(defvar exclude-regex ".*/\\\..*")
-(defvar include-regex ".*")
+(defvar ffip-backup-project-file ".git")
+(defvar ffip-exclude-regex ".*/\\\..*")
+(defvar ffip-include-regex ".*")
 
 (defun plv-find-project-file (dir project-filename)
  (let ((f (expand-file-name project-filename dir))
@@ -139,8 +139,8 @@ Use this to exclude portions of your project: \"-not -regex \\\".*vendor.*\\\"\"
 
 (defun ffip-project-root ()
   (file-name-directory (or
-			(plv-find-project-file default-directory plv-project-file)
-			(plv-find-project-file default-directory backup-project-file)
+			(plv-find-project-file default-directory ffip-project-file)
+			(plv-find-project-file default-directory ffip-backup-project-file)
 			default-directory)))
 
 (defun ffip-uniqueify (file-cons)
@@ -165,10 +165,10 @@ directory they are found in so that they are unique."
 		file-cons))
 	    (split-string (shell-command-to-string (concat "find " (ffip-project-root)
 							   " -type f \\\( -regex \""
-							   include-regex
+							   ffip-include-regex
 							   "\" " 
 							   "! -regex \""
-							   exclude-regex
+							   ffip-exclude-regex
 							   "\" \\\) "))))))
 
 "find /Users/pierrelarochelle/Documents/Source/mixpanel/ -type f -regex \".*\" "
