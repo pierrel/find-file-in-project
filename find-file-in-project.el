@@ -124,19 +124,6 @@
 
 ;;; Code:
 
-(defvar ffip-regexp
-  (concat ".*\\.\\("
-	  (mapconcat (lambda (x) x)
-		     '("rb" "js" "css" "yml" "yaml" "rhtml" "erb" "html" "el" "txt") "\\|")
-	  "\\)")
-  "Regexp of things to look for when using find-file-in-project.")
-
-(defvar ffip-find-options
-  ""
-  "Extra options to pass to `find' when using find-file-in-project.
-
-Use this to exclude portions of your project: \"-not -regex \\\".*vendor.*\\\"\"")
-
 (defun ffip-project-root ()
   (file-name-directory (or
 			(plv-find-project-file default-directory ffip-project-file)
